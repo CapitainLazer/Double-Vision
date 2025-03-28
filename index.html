@@ -17,91 +17,98 @@
 </head>
 <body>
     <script type="module">
-        // import * as THREE from 'https://cdn.skypack.dev/pin/three@v0.150.1-r75e9MvYwn7pBFuUt6Gu/mode=imports,min/optimized/three.js';
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.module.js';
         import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
-        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/GLTFLoader.js';
-
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color (0xa0a0a0);
+        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/GLTFLoader.js';        const scene = new THREE.Scene();
         let SCREEN_WIDTH = window.innerWidth;
         let SCREEN_HEIGHT = window.innerHeight;
-        let ratioLargeurHauteur = SCREEN_WIDTH/SCREEN_HEIGHT;
-        const camera = new THREE.PerspectiveCamera(30,ratioLargeurHauteur,0.1,5000);
-        camera.position.set(0, 50, 250); // Ajuster la position de la caméra pour recentrer sur le modèle
-        camera.lookAt(0, 0, 0); // Recentrer la caméra sur le modèle
+        scene.background = new THREE.Color(0x80CEE1); // Couleur du ciel
+        const ratioLargeurHauteur = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        const camera = new THREE.PerspectiveCamera(30, ratioLargeurHauteur, 0.1, 200); // Distance d'affichage
+        camera.position.set(0, 0, 150); // Position de la caméra
+        camera.lookAt(0, 0, 0); // Orientation de la caméra
 
         const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
-        const controls = new OrbitControls(camera,renderer.domElement);
-        controls.update();
-        controls.minDistance=1;
-        controls.maxDistance=10;
-        controls.maxPolarAngle= Math.PI / 2;
-        controls.dampingFactor= 0.05;
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         document.body.appendChild(renderer.domElement);
 
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.minDistance = 1;
+        controls.maxDistance = 5;
+        controls.maxPolarAngle = Math.PI / 2;
+        controls.dampingFactor = 0.05;
+
         const clock = new THREE.Clock();
+        const mixers = [];
 
-const mixers = [];
-const loaderGLTF = new GLTFLoader();
-loaderGLTF.load(
-    './Models/character.glb', // Corrected path
-    function (gltf) {
-        const mesh = gltf.scene.children[0];
-        const s = 0.35;
-        mesh.scale.set(s, s, s);
-        mesh.position.y = 0; // Centrer verticalement
-        mesh.rotation.x = - Math.PI /2; // Mettre à la verticale
-        scene.add(mesh);
+        const loaderGLTF = new GLTFLoader();
 
-        const mixer = new THREE.AnimationMixer(mesh); // Fixed TREE to THREE
-        mixer.clipAction(gltf.animations[0]).setDuration(5).play(); // Augmenter la durée pour réduire la vitesse
-        mixers.push(mixer); // Fixed Push to push
-    },
-    undefined,
-    function (err) {
-        console.error('Erreur de chargement', err);
-    }
-);
 
-        const dirLightIntensity=1;
-        const dirLight = new THREE.DirectionalLight({color: 0xffffff}, dirLightIntensity);
-        dirLight.position.set(-1,2,4);
-        scene.add(dirLight);
+        loaderGLTF.load(
+            './Models/minicharacter.glb',
+            function (gltf) {
+                const mesh = gltf.scene.children[0];
+                const s = 0.35;
+                mesh.scale.set(s, s, s);
+                mesh.position.y = 0; // Centrer verticalement
+                mesh.rotation.x = -Math.PI / 2; // Mettre à la verticale
 
-        function animate(){
+                // Utilise le matériau par défaut du modèle
+                scene.add(mesh);
+
+                const mixer = new THREE.AnimationMixer(mesh);
+                mixer.clipAction(gltf.animations[0]).setDuration(2.5).play(); // Réduire légèrement la durée pour accélérer
+                mixers.push(mixer);
+            },
+            undefined,
+            function (err) {
+                console.error('Erreur de chargement', err);
+            }
+        );
+
+        // const dirLight = new THREE.DirectionalLight(0xffffff, 1); // Lumière directionnelle
+        // dirLight.position.set(-1, 2, 4);
+        // scene.add(dirLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffdd88, 1.5); // Lumière chaude pour simuler le soleil
+        sunLight.position.set(10, 20, 10); // Position élevée pour simuler le soleil
+        sunLight.castShadow = true; // Active les ombres
+        sunLight.shadow.mapSize.width = 1024; // Taille de la carte d'ombre
+        sunLight.shadow.mapSize.height = 1024;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 50;
+        scene.add(sunLight);
+
+    
+
+        function animate() {
             requestAnimationFrame(animate);
             controls.update();
 
             const delta = clock.getDelta();
-            for(let i= 0; i<mixers.length; i++){
-                mixers[i].update(delta)
-            }
+            mixers.forEach(mixer => mixer.update(delta));
 
-            renderer.render(scene, camera)
-
+            renderer.render(scene, camera);
         }
         animate();
-        function onWindowResize(){
-            console.log("redimensionnement de la fenetre");
-            SCREEN_WIDTH = window.innerWidth;
-            let SCREEN_HEIGHT = window.innerHeight;
-            let ratioLargeurHauteur = SCREEN_WIDTH/SCREEN_HEIGHT;
-            camera.aspect= ratioLargeurHauteur;
-            camera.updateProjectionMatrix();
-            renderer.setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
-            
-        }
-        window.addEventListener("resize",onWindowResize);
 
-        
-        function evenementTouche(event){
-            switch(event.key){
-               
+        function onWindowResize() {
+            SCREEN_WIDTH = window.innerWidth;
+            SCREEN_HEIGHT = window.innerHeight;
+            const ratioLargeurHauteur = SCREEN_WIDTH / SCREEN_HEIGHT;
+            camera.aspect = ratioLargeurHauteur;
+            camera.updateProjectionMatrix();
+            renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        }
+        window.addEventListener("resize", onWindowResize);
+
+        function evenementTouche(event) {
+            switch (event.key) {
+                // Ajoutez des actions pour les touches ici
             }
         }
-        document.addEventListener("keydown",evenementTouche);
+        document.addEventListener("keydown", evenementTouche);
     </script>
 </body>
 </html>
