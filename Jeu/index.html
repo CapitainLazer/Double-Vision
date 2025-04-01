@@ -1,0 +1,176 @@
+<!-- boucle de rendu : cube qui tourne
+    exo 3 : lumière directionnelle
+    exo 4 : redimensionnement
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Double Vision</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        .center-divider {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0.3vw;
+            height: 100%;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-divider"></div>
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.module.js';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
+        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/GLTFLoader.js';        
+        const scene = new THREE.Scene();
+        let SCREEN_WIDTH = window.innerWidth;
+        let SCREEN_HEIGHT = window.innerHeight;
+        scene.background = new THREE.Color(0x80CEE1); // Couleur du ciel
+        const ratioLargeurHauteur = SCREEN_WIDTH / SCREEN_HEIGHT;
+
+        const camera = new THREE.PerspectiveCamera(30, ratioLargeurHauteur, 0.1, 200); // Distance d'affichage
+        camera.position.set(0, 50, 150); // Réhausse la caméra principale
+        camera.lookAt(0, 0, 0); // Orientation de la caméra
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.minDistance = 2;
+        controls.maxDistance = 5;
+        controls.maxPolarAngle = Math.PI / 2;
+        controls.dampingFactor = 0.05;
+
+        const clock = new THREE.Clock();
+        const mixers = [];
+
+        const loaderGLTF = new GLTFLoader();
+
+        const sunLight = new THREE.DirectionalLight(0xffdd88, 1.5); // Lumière chaude pour simuler le soleil
+        sunLight.position.set(10, 20, 10); // Position élevée pour simuler le soleil
+        sunLight.castShadow = true; // Active les ombres
+        sunLight.shadow.mapSize.width = 1024; // Taille de la carte d'ombre
+        sunLight.shadow.mapSize.height = 1024;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 50;
+        scene.add(sunLight);
+
+        // Configuration de la deuxième scène
+        const scene2 = new THREE.Scene();
+        scene2.background = new THREE.Color(0x80CEE1); // Même couleur de fond que la première scène
+
+        const camera2 = new THREE.PerspectiveCamera(30, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 200);
+        camera2.position.set(0, 50, 150); // Même position que la première caméra
+        camera2.lookAt(0, 0, 0);
+
+        const controls2 = new OrbitControls(camera2, renderer.domElement);
+        controls2.minDistance = 2;
+        controls2.maxDistance = 5;
+        controls2.maxPolarAngle = Math.PI / 2;
+        controls2.dampingFactor = 0.05;
+
+        // Cloner la lumière pour la deuxième scène
+        const sunLight2 = sunLight.clone();
+        scene2.add(sunLight2);
+
+        const models = []; // Tableau pour stocker les modèles de la première scène
+        const models2 = []; // Tableau pour stocker les modèles de la deuxième scène
+
+        loaderGLTF.load(
+            '../Models/isometric_bedroom/scene.gltf',
+            function (gltf) {
+                const mesh = gltf.scene;
+                const s = 0.35;
+                mesh.scale.set(s, s, s);
+                mesh.position.y = -0.5; // Réinitialiser la position verticale
+                mesh.rotation.x = 0; // Mettre à la verticale
+
+                // Ajouter le modèle à la première scène
+                scene.add(mesh);
+                models.push(mesh); // Stocker le modèle dans le tableau
+
+                // Cloner le modèle pour la deuxième scène
+                const clonedMesh = mesh.clone();
+                clonedMesh.position.y = -0.5; // Réinitialiser la position verticale
+                scene2.add(clonedMesh);
+                models2.push(clonedMesh); // Stocker le modèle cloné dans le tableau
+
+                // Parcourir les enfants du modèle
+                mesh.traverse((child) => {
+                    if (child.isMesh) {
+                        console.log('Enfant de la première scène :', child.name);
+                    }
+                });
+
+                clonedMesh.traverse((child) => {
+                    if (child.isMesh) {
+                        console.log('Enfant de la deuxième scène :', child.name);
+                    }
+                });
+            },
+            undefined,
+            function (err) {
+                console.error('Erreur de chargement', err);
+            }
+        );
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            controls.update();
+            controls2.update();
+
+            const delta = clock.getDelta();
+            mixers.forEach(mixer => mixer.update(delta));
+
+            // Rendu de la première scène avec la première caméra
+            renderer.setViewport(0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+            renderer.setScissor(0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+            renderer.setScissorTest(true);
+            camera.aspect = (SCREEN_WIDTH / 2) / SCREEN_HEIGHT; // Ajuster le ratio d'aspect de la caméra 1
+            camera.updateProjectionMatrix();
+            renderer.render(scene, camera);
+
+            // Rendu de la deuxième scène avec la deuxième caméra
+            renderer.setViewport(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+            renderer.setScissor(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+            renderer.setScissorTest(true);
+            camera2.aspect = (SCREEN_WIDTH / 2) / SCREEN_HEIGHT; // Ajuster le ratio d'aspect de la caméra 2
+            camera2.updateProjectionMatrix();
+            renderer.render(scene2, camera2);
+        }
+        animate();
+
+        function onWindowResize() {
+            SCREEN_WIDTH = window.innerWidth;
+            SCREEN_HEIGHT = window.innerHeight;
+
+            // Mettre à jour les ratios d'aspect pour les deux caméras
+            camera.aspect = (SCREEN_WIDTH / 2) / SCREEN_HEIGHT;
+            camera.updateProjectionMatrix();
+
+            camera2.aspect = (SCREEN_WIDTH / 2) / SCREEN_HEIGHT;
+            camera2.updateProjectionMatrix();
+
+            renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        }
+        window.addEventListener("resize", onWindowResize);
+
+        function evenementTouche(event) {
+            switch (event.key) {
+                // Ajouter des actions pour les touches ici
+            }
+        }
+        document.addEventListener("keydown", evenementTouche);
+    </script>
+</body>
+</html>
