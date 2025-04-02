@@ -33,11 +33,11 @@
         const scene = new THREE.Scene();
         let SCREEN_WIDTH = window.innerWidth;
         let SCREEN_HEIGHT = window.innerHeight;
-        scene.background = new THREE.Color(0x80CEE1); // Couleur du ciel
+        scene.background = new THREE.Color(0x80CEFF); // Couleur du ciel
         const ratioLargeurHauteur = SCREEN_WIDTH / SCREEN_HEIGHT;
 
         const camera = new THREE.PerspectiveCamera(30, ratioLargeurHauteur, 0.1, 200); // Distance d'affichage
-        camera.position.set(0, 50, 150); // Réhausse la caméra principale
+        camera.position.set(0, 5, 10); // Ajuster la position pour voir la scène
         camera.lookAt(0, 0, 0); // Orientation de la caméra
 
         const renderer = new THREE.WebGLRenderer();
@@ -64,12 +64,15 @@
         sunLight.shadow.camera.far = 50;
         scene.add(sunLight);
 
+        // Abaisser la première scène
+        scene.position.y -= 0.5;
+
         // Configuration de la deuxième scène
         const scene2 = new THREE.Scene();
-        scene2.background = new THREE.Color(0x80CEE1); // Même couleur de fond que la première scène
+        scene2.background = new THREE.Color(0x80CEFF); // Même couleur de fond que la première scène
 
         const camera2 = new THREE.PerspectiveCamera(30, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 200);
-        camera2.position.set(0, 50, 150); // Même position que la première caméra
+        camera2.position.set(0, 5, 10); // Ajuster la position pour voir la scène
         camera2.lookAt(0, 0, 0);
 
         const controls2 = new OrbitControls(camera2, renderer.domElement);
@@ -82,46 +85,116 @@
         const sunLight2 = sunLight.clone();
         scene2.add(sunLight2);
 
+        // Abaisser la deuxième scène
+        scene2.position.y -= 0.5;
+
         const models = []; // Tableau pour stocker les modèles de la première scène
         const models2 = []; // Tableau pour stocker les modèles de la deuxième scène
+        const separatedObjects = []; // Tableau pour stocker les objets séparés
 
-        loaderGLTF.load(
-            '../Models/isometric_bedroom/scene.gltf',
-            function (gltf) {
-                const mesh = gltf.scene;
-                const s = 0.35;
-                mesh.scale.set(s, s, s);
-                mesh.position.y = -0.5; // Réinitialiser la position verticale
-                mesh.rotation.x = 0; // Mettre à la verticale
+        function loadModel(path, scene, models, separatedObjects, selectable = false) {
+            loaderGLTF.load(
+                path,
+                function (gltf) {
+                    const mesh = gltf.scene;
+                    const s = 0.35;
+                    mesh.scale.set(s, s, s);
+                    mesh.position.set(0, 0, 0); // Centrer le modèle dans la scène
+                    mesh.rotation.x = 0; // Mettre à la verticale
 
-                // Ajouter le modèle à la première scène
-                scene.add(mesh);
-                models.push(mesh); // Stocker le modèle dans le tableau
+                    // Ajouter le modèle à la scène
+                    scene.add(mesh);
+                    models.push(mesh); // Stocker le modèle dans le tableau
 
-                // Cloner le modèle pour la deuxième scène
-                const clonedMesh = mesh.clone();
-                clonedMesh.position.y = -0.5; // Réinitialiser la position verticale
-                scene2.add(clonedMesh);
-                models2.push(clonedMesh); // Stocker le modèle cloné dans le tableau
+                    // Parcourir les enfants du modèle et attribuer le statut sélectionnable
+                    mesh.traverse((child) => {
+                        if (child.isMesh) {
+                            child.userData.selectable = selectable; // Attribuer le statut sélectionnable
+                            if (selectable) {
+                                separatedObjects.push(child); // Ajouter uniquement les objets sélectionnables
+                                console.log(`Objet sélectionnable ajouté (${path}):`, child.name);
+                            } else {
+                                console.log(`Objet non sélectionnable chargé (${path}):`, child.name);
+                            }
+                        }
+                    });
+                },
+                undefined,
+                function (err) {
+                    console.error(`Erreur de chargement du modèle (${path}):`, err);
+                }
+            );
+        }
 
-                // Parcourir les enfants du modèle
-                mesh.traverse((child) => {
-                    if (child.isMesh) {
-                        console.log('Enfant de la première scène :', child.name);
-                    }
-                });
+        // Charger les modèles dans les deux scènes
+        loadModel('../Models/isometric_bedroom/scene.gltf', scene, models, separatedObjects, false); // Non sélectionnable
+        loadModel('../Models/isometric_bedroom/scene.gltf', scene2, models2, separatedObjects, false); // Non sélectionnable
+        loadModel('../Models/isometric_bedroom/textures/models/bag.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/bag.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/cup.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/cup.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/mouse.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/mouse.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/console.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/console.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/book1.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/book1.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/slipers.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/slipers.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frames.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frames.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/lamp.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/lamp.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/book2.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/book2.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/book3.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/book3.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/chair.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/chair.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/book4.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/book4.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/table.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/table.gltf', scene2, models2, separatedObjects, true);
 
-                clonedMesh.traverse((child) => {
-                    if (child.isMesh) {
-                        console.log('Enfant de la deuxième scène :', child.name);
-                    }
-                });
-            },
-            undefined,
-            function (err) {
-                console.error('Erreur de chargement', err);
+        const raycaster = new THREE.Raycaster(); // Raycaster pour détecter les objets
+        const mouse = new THREE.Vector2(); // Position de la souris
+        let previousIntersected = null; // Dernier objet intersecté
+
+        function onMouseMove(event) {
+            // Calculer la position de la souris en coordonnées normalisées (-1 à +1)
+            mouse.x = ((event.clientX - SCREEN_WIDTH / 2) / (SCREEN_WIDTH / 2)) * 2 - 1; // Ajuster pour la scène 2
+            mouse.y = -(event.clientY / SCREEN_HEIGHT) * 2 + 1;
+        }
+
+        function highlightObjectsScene2() {
+            // Effectuer un raycast à partir de la position de la souris
+            raycaster.setFromCamera(mouse, camera2);
+
+            // Vérifier les intersections avec les objets de la scène 2
+            const intersects = raycaster.intersectObjects(models2, true).filter(intersect => intersect.object.isMesh && intersect.object.userData.selectable);
+
+            if (previousIntersected && previousIntersected !== intersects[0]?.object) {
+                // Réinitialiser la couleur de la dernière Mesh sélectionnée
+                if (previousIntersected.material && previousIntersected.userData.originalColor) {
+                    previousIntersected.material.color.set(previousIntersected.userData.originalColor);
+                }
+                previousIntersected = null;
             }
-        );
+
+            if (intersects.length > 0) {
+                const intersected = intersects[0].object;
+
+                // Vérifier que l'objet intersecté est une Mesh et qu'il a un matériau
+                if (intersected.isMesh && intersected.material) {
+                    // Sauvegarder la couleur d'origine et appliquer une couleur bleue
+                    if (!intersected.userData.originalColor) {
+                        intersected.userData.originalColor = intersected.material.color.getHex();
+                    }
+                    intersected.material.color.set(0x0000ff); // Appliquer une couleur bleue
+                    previousIntersected = intersected;
+                }
+            }
+        }
 
         function animate() {
             requestAnimationFrame(animate);
@@ -131,6 +204,9 @@
 
             const delta = clock.getDelta();
             mixers.forEach(mixer => mixer.update(delta));
+
+            // Mettre à jour le Raycaster pour le survol des objets dans la scène 2
+            highlightObjectsScene2();
 
             // Rendu de la première scène avec la première caméra
             renderer.setViewport(0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
@@ -171,6 +247,9 @@
             }
         }
         document.addEventListener("keydown", evenementTouche);
+
+        // Ajouter un écouteur pour détecter les mouvements de la souris
+        window.addEventListener('mousemove', onMouseMove);
     </script>
 </body>
 </html>
