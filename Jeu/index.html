@@ -155,6 +155,8 @@
         loadModel('../Models/isometric_bedroom/textures/models/book4.gltf', scene2, models2, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/table.gltf', scene, models, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/table.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/keyboard.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/keyboard.gltf', scene2, models2, separatedObjects, true);
 
         const raycaster = new THREE.Raycaster(); // Raycaster pour détecter les objets
         const mouse = new THREE.Vector2(); // Position de la souris
@@ -194,6 +196,111 @@
                     previousIntersected = intersected;
                 }
             }
+        }
+
+        // Charger des textures depuis des fichiers externes
+        const textures = [
+            new THREE.TextureLoader().load('Textures/fiveTone.jpg'),
+            new THREE.TextureLoader().load('Textures/threeTone.jpg'),
+            new THREE.TextureLoader().load('Textures/texture3.jpg')
+        ];
+
+        // Charger les shaders depuis des fichiers externes
+        async function loadShader(url) {
+            const response = await fetch(url);
+            return await response.text();
+        }
+
+        // Liste pour stocker les éléments modifiés
+        const modifiedElements = [];
+
+        // Ajouter un élément HTML pour afficher le compteur
+        const counterElement = document.createElement('div');
+        counterElement.style.position = 'absolute';
+        counterElement.style.top = '10px';
+        counterElement.style.left = '10px';
+        counterElement.style.padding = '10px';
+        counterElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        counterElement.style.color = 'white';
+        counterElement.style.fontSize = '16px';
+        counterElement.style.borderRadius = '5px';
+        counterElement.innerText = 'Éléments modifiés : 0';
+        document.body.appendChild(counterElement);
+
+        // Mettre à jour le compteur
+        function updateCounter() {
+            counterElement.innerText = `Éléments modifiés : ${modifiedElements.length}`;
+        }
+
+        // Fonction pour randomiser les shaders, textures et couleurs
+        async function randomizeMeshAppearance(mesh) {
+            const vertexShader = await loadShader('Shaders/vertexShader.glsl');
+            const fragmentShader = await loadShader('Shaders/fragmentShader.glsl');
+
+            mesh.traverse((child) => {
+                if (child.isMesh) {
+                    // Randomiser la couleur
+                    child.material.color = new THREE.Color(Math.random(), Math.random(), Math.random());
+
+                    // Randomiser la texture
+                    if (Math.random() > 0.5) {
+                        const randomTexture = textures[Math.floor(Math.random() * textures.length)];
+                        child.material.map = randomTexture;
+                        child.material.needsUpdate = true;
+                    }
+
+                    // Randomiser le shader
+                    if (Math.random() > 0.5) {
+                        child.material = new THREE.ShaderMaterial({
+                            vertexShader: vertexShader,
+                            fragmentShader: fragmentShader
+                        });
+                    }
+
+                    // Ajouter l'élément à la liste des éléments modifiés
+                    modifiedElements.push(child);
+                    updateCounter(); // Mettre à jour le compteur
+                }
+            });
+        }
+
+        // Ajouter un écouteur pour la touche "u"
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "u") {
+                // Parcourir les éléments modifiés et les afficher en jaune
+                modifiedElements.forEach((mesh) => {
+                    if (element.material) {
+                        element.material.color.set(0xffff00); // Couleur jaune
+                    }
+                });
+            }
+        });
+
+        // Fonction pour appliquer aléatoirement la randomisation de textures et shaders uniquement à scene2
+        async function applyRandomizationToScene2(scene, excludedModels) {
+            const randomCount = getRandomNumberBetween5And10(); // Générer un nombre aléatoire entre 5 et 10
+            let randomizedCount = 0;
+
+            for (const child of scene.children) {
+                if (child.isMesh && !excludedModels.includes(child.name)) {
+                    if (randomizedCount >= randomCount) break; // Arrêter après avoir atteint le nombre aléatoire
+                    await randomizeMeshAppearance(child);
+                    randomizedCount++;
+                }
+            }
+        }
+
+        // Exclure `scene.gltf` des modèles à randomiser
+        const excludedModels = ['scene.gltf'];
+
+        // Appliquer la randomisation uniquement aux éléments de scene2
+        setTimeout(async () => {
+            await applyRandomizationToScene2(scene2, excludedModels);
+        }, 1000); // Délai pour s'assurer que les modèles sont chargés
+
+        // Fonction pour générer un nombre aléatoire entre 5 et 10 inclus
+        function getRandomNumberBetween5And10() {
+            return Math.floor(Math.random() * (10 - 5 + 1)) + 5;
         }
 
         function animate() {
