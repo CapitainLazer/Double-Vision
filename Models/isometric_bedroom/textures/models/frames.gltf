@@ -11,36 +11,21 @@
 		{
 			"name":"Scene",
 			"nodes":[
-				0,
-				2,
-				4,
-				6,
-				8
+				1,
+				3,
+				5,
+				7
 			]
 		}
 	],
 	"nodes":[
 		{
-			"name":"console_12",
-			"rotation":[
-				0,
-				0.060227736830711365,
-				0,
-				0.9981846809387207
-			],
-			"translation":[
-				0.5509771704673767,
-				0.8032473921775818,
-				-1.5305742025375366
-			]
-		},
-		{
 			"mesh":0,
-			"name":"Object_104"
+			"name":"frame1"
 		},
 		{
 			"children":[
-				1
+				0
 			],
 			"name":"frame.002_50",
 			"scale":[
@@ -56,11 +41,11 @@
 		},
 		{
 			"mesh":1,
-			"name":"Object_106"
+			"name":"frame2"
 		},
 		{
 			"children":[
-				3
+				2
 			],
 			"name":"frame.003_51",
 			"scale":[
@@ -76,11 +61,11 @@
 		},
 		{
 			"mesh":2,
-			"name":"Object_126"
+			"name":"frame3"
 		},
 		{
 			"children":[
-				5
+				4
 			],
 			"name":"frame.004_61",
 			"scale":[
@@ -96,11 +81,11 @@
 		},
 		{
 			"mesh":3,
-			"name":"Object_128"
+			"name":"frame4"
 		},
 		{
 			"children":[
-				7
+				6
 			],
 			"name":"frame.005_62",
 			"scale":[
@@ -128,7 +113,7 @@
 					"specularFactor":0.4007631242275238
 				}
 			},
-			"name":"lpb_gradient",
+			"name":"lpb_gradient.034",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -140,7 +125,7 @@
 	],
 	"meshes":[
 		{
-			"name":"Object_50",
+			"name":"frame1",
 			"primitives":[
 				{
 					"attributes":{
@@ -155,7 +140,7 @@
 			]
 		},
 		{
-			"name":"Object_51",
+			"name":"frame2",
 			"primitives":[
 				{
 					"attributes":{
@@ -170,7 +155,7 @@
 			]
 		},
 		{
-			"name":"Object_61",
+			"name":"frame3",
 			"primitives":[
 				{
 					"attributes":{
@@ -185,7 +170,7 @@
 			]
 		},
 		{
-			"name":"Object_62",
+			"name":"frame4",
 			"primitives":[
 				{
 					"attributes":{

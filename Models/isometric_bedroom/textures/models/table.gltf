@@ -18,7 +18,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Object_58.001"
+			"name":"table"
 		},
 		{
 			"children":[
@@ -45,7 +45,7 @@
 					"specularFactor":0.4007631242275238
 				}
 			},
-			"name":"lpb_gradient.003",
+			"name":"lpb_gradient.010",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -57,7 +57,7 @@
 	],
 	"meshes":[
 		{
-			"name":"Object_27",
+			"name":"Object_27.001",
 			"primitives":[
 				{
 					"attributes":{

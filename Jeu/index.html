@@ -1,8 +1,3 @@
-<!-- boucle de rendu : cube qui tourne
-    exo 3 : lumière directionnelle
-    exo 4 : redimensionnement
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,14 +13,133 @@
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 0.3vw;
+            width: 0.1vw;
             height: 100%;
             background-color: black;
+        }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .menu-content {
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .menu-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .menu-button:hover {
+            background-color: #45a049;
+        }
+        .toolbox {
+            position: absolute;
+            top: 10px;
+            left: 10px; /* Déplacer vers le côté gauche */
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            border-radius: 5px;
+            padding: 10px;
+            z-index: 1000;
+        }
+        .toolbox h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+        .toolbox ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .toolbox ul li {
+            margin-bottom: 5px;
+        }
+        .audio-svg {
+            width: 10%;
+            fill: url(#gradient); /* Appliquer le dégradé au tracé du SVG */
+        }
+        .volume-control {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            z-index: 1000;
+            display: none; /* Masquer par défaut */
+            flex-direction: column;
+            align-items: center;
+        }
+        .volume-control input[type="range"] {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 8px;
+            margin-top: 10px;
+            border-radius: 5px; /* Arrondir le slider */
+            background: #ccc;
+            outline: none;
+        }
+        .volume-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%; /* Arrondir le curseur */
+            background: #4CAF50;
+            cursor: pointer;
+        }
+        .volume-control img {
+            width: 30px;
+            height: 30px;
         }
     </style>
 </head>
 <body>
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-content">
+            <h1>Bienvenue dans Double Vision</h1>
+            <br>
+            <img src="../Images/landscape.png" style="max-width: 10%;"> 
+            <p>Veuiller passer en mode <strong>paysage</strong> de manière aprofiter pleinement de cette experience</p>
+            <p>Appuyez sur <strong>t</strong> pour afficher le guide des touches.</p>
+            <br>
+            <button class="menu-button" id="startButton">Commencer</button>
+        </div>
+    </div>
+    <div class="toolbox">
+        <h3>GUIDE DES TOUCHES</h3>
+        <ul>
+            <li><strong>i</strong> : Met en évidence les éléments modifiables</li>
+            <li><strong>u</strong> : Afficher les éléments modifiés en jaune</li>
+            <li><strong>clic</strong> : Trouver un élément modifié</li>
+            <li><strong>r</strong> : Réinitialiser la position des caméras</li>
+        </ul>
+    </div>
     <div class="center-divider"></div>
+    <div class="volume-control">
+        <img src="../Images/Speaker_Icon.svg" alt="Speaker Icon">
+        <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <audio id="backgroundMusic" src="../Musique/lofi-chill-315216.mp3" loop></audio>
     <script type="module">
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.module.js';
         import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
@@ -55,9 +169,11 @@
 
         const loaderGLTF = new GLTFLoader();
 
+        const modifiableElements = ["bag", "lamp", "chair", "book1", "book2", "book3", "book4", "mouse", "console", "frame1", "frame2", "frame3", "frame4", "slipers", "table", "keyboard","cup"]; // Liste des éléments modifiables
+
         const sunLight = new THREE.DirectionalLight(0xffdd88, 1.5); // Lumière chaude pour simuler le soleil
         sunLight.position.set(10, 20, 10); // Position élevée pour simuler le soleil
-        sunLight.castShadow = true; // Active les ombres
+        sunLight.castShadow = true; // Activer les ombres
         sunLight.shadow.mapSize.width = 1024; // Taille de la carte d'ombre
         sunLight.shadow.mapSize.height = 1024;
         sunLight.shadow.camera.near = 0.5;
@@ -100,7 +216,7 @@
                     const s = 0.35;
                     mesh.scale.set(s, s, s);
                     mesh.position.set(0, 0, 0); // Centrer le modèle dans la scène
-                    mesh.rotation.x = 0; // Mettre à la verticale
+                    mesh.rotation.x = 0; // Mettre droit
 
                     // Ajouter le modèle à la scène
                     scene.add(mesh);
@@ -112,16 +228,16 @@
                             child.userData.selectable = selectable; // Attribuer le statut sélectionnable
                             if (selectable) {
                                 separatedObjects.push(child); // Ajouter uniquement les objets sélectionnables
-                                console.log(`Objet sélectionnable ajouté (${path}):`, child.name);
+                                console.log(`Objet sélectionnable ajouté (${path}) :`, child.name);
                             } else {
-                                console.log(`Objet non sélectionnable chargé (${path}):`, child.name);
+                                console.log(`Objet non sélectionnable chargé (${path}) :`, child.name);
                             }
                         }
                     });
                 },
                 undefined,
                 function (err) {
-                    console.error(`Erreur de chargement du modèle (${path}):`, err);
+                    console.error(`Erreur lors du chargement du modèle (${path}) :`, err);
                 }
             );
         }
@@ -141,8 +257,6 @@
         loadModel('../Models/isometric_bedroom/textures/models/book1.gltf', scene2, models2, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/slipers.gltf', scene, models, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/slipers.gltf', scene2, models2, separatedObjects, true);
-        loadModel('../Models/isometric_bedroom/textures/models/frames.gltf', scene, models, separatedObjects, true);
-        loadModel('../Models/isometric_bedroom/textures/models/frames.gltf', scene2, models2, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/lamp.gltf', scene, models, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/lamp.gltf', scene2, models2, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/book2.gltf', scene, models, separatedObjects, true);
@@ -157,6 +271,14 @@
         loadModel('../Models/isometric_bedroom/textures/models/table.gltf', scene2, models2, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/keyboard.gltf', scene, models, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/keyboard.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frame1.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frame1.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frame2.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frame2.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frame3.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frame3.gltf', scene2, models2, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frame4.gltf', scene, models, separatedObjects, true);
+        loadModel('../Models/isometric_bedroom/textures/models/frame4.gltf', scene2, models2, separatedObjects, true);
 
         const raycaster = new THREE.Raycaster(); // Raycaster pour détecter les objets
         const mouse = new THREE.Vector2(); // Position de la souris
@@ -169,14 +291,15 @@
         }
 
         function highlightObjectsScene2() {
-            // Effectuer un raycast à partir de la position de la souris
             raycaster.setFromCamera(mouse, camera2);
 
-            // Vérifier les intersections avec les objets de la scène 2
-            const intersects = raycaster.intersectObjects(models2, true).filter(intersect => intersect.object.isMesh && intersect.object.userData.selectable);
+            // Intersect objects in scene2
+            const intersects = raycaster.intersectObjects(models2, true).filter(intersect => 
+                intersect.object.isMesh && intersect.object.userData.selectable === true && intersect.object.name !== 'scene.gltf' // Exclude scene.gltf
+            );
 
             if (previousIntersected && previousIntersected !== intersects[0]?.object) {
-                // Réinitialiser la couleur de la dernière Mesh sélectionnée
+                // Reset the color of the previously intersected object
                 if (previousIntersected.material && previousIntersected.userData.originalColor) {
                     previousIntersected.material.color.set(previousIntersected.userData.originalColor);
                 }
@@ -186,89 +309,219 @@
             if (intersects.length > 0) {
                 const intersected = intersects[0].object;
 
-                // Vérifier que l'objet intersecté est une Mesh et qu'il a un matériau
+                // Highlight the intersected object
                 if (intersected.isMesh && intersected.material) {
-                    // Sauvegarder la couleur d'origine et appliquer une couleur bleue
                     if (!intersected.userData.originalColor) {
-                        intersected.userData.originalColor = intersected.material.color.getHex();
+                        intersected.userData.originalColor = intersected.material.color.clone();
                     }
-                    intersected.material.color.set(0x0000ff); // Appliquer une couleur bleue
+                    intersected.material.color.set(0x0000ff); // Apply blue highlight
                     previousIntersected = intersected;
                 }
             }
         }
 
-        // Charger des textures depuis des fichiers externes
-        const textures = [
-            new THREE.TextureLoader().load('Textures/fiveTone.jpg'),
-            new THREE.TextureLoader().load('Textures/threeTone.jpg'),
-            new THREE.TextureLoader().load('Textures/texture3.jpg')
-        ];
+        // Gestion des éléments modifiés et trouvés
+        const modifiedElements = new Set(); // Éléments modifiés par applyRandomizationToScene2
+        const foundElements = new Set(); // Éléments trouvés
 
-        // Charger les shaders depuis des fichiers externes
-        async function loadShader(url) {
-            const response = await fetch(url);
-            return await response.text();
+        function addModifiedElement(element) {
+            modifiedElements.add(element);
         }
 
-        // Liste pour stocker les éléments modifiés
-        const modifiedElements = [];
+        function isModifiedElement(element) {
+            return modifiedElements.has(element);
+        }
 
-        // Ajouter un élément HTML pour afficher le compteur
+        function addFoundElement(element) {
+            foundElements.add(element);
+        }
+
+        function isFoundElement(element) {
+            return foundElements.has(element);
+        }
+
+        function resetElements() {
+            modifiedElements.clear();
+            foundElements.clear();
+        }
+
+        // Gestion du score
         const counterElement = document.createElement('div');
         counterElement.style.position = 'absolute';
         counterElement.style.top = '10px';
-        counterElement.style.left = '10px';
+        counterElement.style.right = '10px';
         counterElement.style.padding = '10px';
-        counterElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        counterElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
         counterElement.style.color = 'white';
         counterElement.style.fontSize = '16px';
         counterElement.style.borderRadius = '5px';
-        counterElement.innerText = 'Éléments modifiés : 0';
         document.body.appendChild(counterElement);
 
-        // Mettre à jour le compteur
         function updateCounter() {
-            counterElement.innerText = `Éléments modifiés : ${modifiedElements.length}`;
+            counterElement.innerText = `Éléments trouvés : ${foundElements.size}/${modifiedElements.size}`;
+            if (foundElements.size === modifiedElements.size && modifiedElements.size > 0) {
+                showEndScreen(); // Afficher l'écran de fin
+            }
         }
 
-        // Fonction pour randomiser les shaders, textures et couleurs
-        async function randomizeMeshAppearance(mesh) {
-            const vertexShader = await loadShader('Shaders/vertexShader.glsl');
-            const fragmentShader = await loadShader('Shaders/fragmentShader.glsl');
+        // Écran de fin
+        const endScreen = document.createElement('div');
+        endScreen.style.position = 'fixed';
+        endScreen.style.top = '0';
+        endScreen.style.left = '0';
+        endScreen.style.width = '100%';
+        endScreen.style.height = '100%';
+        endScreen.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        endScreen.style.color = 'white';
+        endScreen.style.display = 'flex';
+        endScreen.style.flexDirection = 'column';
+        endScreen.style.justifyContent = 'center';
+        endScreen.style.alignItems = 'center';
+        endScreen.style.zIndex = '1000';
+        endScreen.style.display = 'none';
+        endScreen.innerHTML = `
+            <h1>Game Over</h1>
+            <button id="replayButton" style="padding: 10px 20px; font-size: 18px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Rejouer</button>
+        `;
+        document.body.appendChild(endScreen);
 
-            mesh.traverse((child) => {
-                if (child.isMesh) {
-                    // Randomiser la couleur
-                    child.material.color = new THREE.Color(Math.random(), Math.random(), Math.random());
+        function showEndScreen() {
+            endScreen.style.display = 'flex'; // Afficher l'écran de fin
+        }
 
-                    // Randomiser la texture
-                    if (Math.random() > 0.5) {
-                        const randomTexture = textures[Math.floor(Math.random() * textures.length)];
-                        child.material.map = randomTexture;
-                        child.material.needsUpdate = true;
-                    }
+        document.getElementById('replayButton').addEventListener('click', () => {
+            endScreen.style.display = 'none'; // Masquer l'écran de fin
+            resetElements(); // Réinitialiser les éléments modifiés et trouvés
 
-                    // Randomiser le shader
-                    if (Math.random() > 0.5) {
-                        child.material = new THREE.ShaderMaterial({
-                            vertexShader: vertexShader,
-                            fragmentShader: fragmentShader
-                        });
-                    }
+            // Réinitialiser les couleurs des objets dans la scène
+            scene2.traverse((child) => {
+                if (child.isMesh && child.material && child.userData.selectable) {
+                    child.material.color.set(child.userData.originalColor || 0xffffff); // Réinitialiser la couleur
+                }
+            });
 
-                    // Ajouter l'élément à la liste des éléments modifiés
-                    modifiedElements.push(child);
-                    updateCounter(); // Mettre à jour le compteur
+            // Réinitialiser les caméras et les contrôles
+            camera.position.set(0, 5, 10);
+            camera.lookAt(0, 0, 0);
+            camera.updateProjectionMatrix();
+            controls.reset();
+
+            camera2.position.set(0, 5, 10);
+            camera2.lookAt(0, 0, 0);
+            camera2.updateProjectionMatrix();
+            controls2.reset();
+
+            // Appliquer une nouvelle randomisation à la scène
+            applyRandomizationToScene2(scene2, excludedModels);
+
+            // Réinitialiser le compteur après la randomisation
+            updateCounter();
+
+            lives = 3; // Réinitialiser les vies
+            updateLivesDisplay(); // Mettre à jour l'affichage des vies
+        });
+
+        // Gestion des clics sur les éléments modifiés
+        const excludedModels = ['scene.gltf']; // Exclure `scene.gltf` des interactions
+
+        function onElementClick(event) {
+            // Convert mouse position to normalized device coordinates (-1 to +1)
+            mouse.x = ((event.clientX - SCREEN_WIDTH / 2) / (SCREEN_WIDTH / 2)) * 2 - 1;
+            mouse.y = -(event.clientY / SCREEN_HEIGHT) * 2 + 1;
+
+            // Set raycaster from camera2 and mouse position
+            raycaster.setFromCamera(mouse, camera2);
+
+            // Intersect objects in the scene2
+            const intersects = raycaster.intersectObjects(models2, true).filter(intersect => 
+                intersect.object.isMesh && intersect.object.userData.selectable === true && !excludedModels.includes(intersect.object.name)
+            );
+
+            if (intersects.length > 0) {
+                const clickedObject = intersects[0].object;
+
+                // Check if the clicked object is modified and not already found
+                if (isModifiedElement(clickedObject) && !isFoundElement(clickedObject)) {
+                    addFoundElement(clickedObject); // Mark the element as found
+                    updateCounter(); // Update the score counter
+                } else if (!isModifiedElement(clickedObject)) {
+                    loseLife(); // Lose a life if the clicked object is selectable but not modified
+                }
+            } else {
+                console.log("No object detected under the click.");
+            }
+        }
+
+        window.addEventListener('click', onElementClick);
+
+        // Section dédiée aux fonctions de randomisation
+
+        // Fonction pour appliquer une couleur aléatoire (sans noir et blanc)
+        function randomColor(mesh) {
+            const randomColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+            if (randomColor.r !== randomColor.g || randomColor.g !== randomColor.b) { // Exclure noir et blanc
+                mesh.material.color = randomColor;
+            } else {
+                randomColor(mesh); // Réessayer si la couleur est noir ou blanc
+            }
+        }
+       
+        // Fonction pour générer une couleur aléatoire unique qui n'est ni une nuance de noir ni une nuance de blanc
+        function generateUniqueColor(existingColors) {
+            let color;
+            do {
+                color = new THREE.Color(Math.random(), Math.random(), Math.random());
+            } while (
+                (color.r === color.g && color.g === color.b) || // Exclure les nuances de gris (y compris noir et blanc)
+                existingColors.some(
+                    (existingColor) =>
+                        existingColor.r === color.r &&
+                        existingColor.g === color.g &&
+                        existingColor.b === color.b
+                )
+            );
+            return color;
+        }
+
+         // Fonction pour générer un nombre aléatoire entre 5 et 10 inclus
+        function getRandomNumberBetween5And10() {
+            return Math.floor(Math.random() * (10 - 7 + 1)) + 5;
+        }
+        /**
+         * Fonction pour obtenir un tableau d'éléments aléatoires à partir d'un tableau donné
+         * @param {Array} arr - Le tableau d'origine
+         * @param {number} nbElement - Le nombre d'éléments à sélectionner
+         * @return {Array} - Un tableau contenant les éléments sélectionnés
+         */
+        function getRandomArr(arr, nbElement) {
+            let indices = new Set();
+            while (indices.size < nbElement) {
+                indices.add(Math.floor(Math.random() * arr.length));
+            }
+            return [...indices].map(i => arr[i]);
+        }
+
+        // Fonction pour appliquer une randomisation de texture et de shader uniquement à scene2
+        async function applyRandomizationToScene2(lascene, excludedModels) {
+            const randomCount = getRandomNumberBetween5And10(); // Generate a random number between 5 and 10
+            const elementsToRandomize = getRandomArr(modifiableElements, randomCount); // Get random elements
+            const uniqueColors = [];
+            
+            lascene.traverse((child) => {
+                if (child.isMesh && child.userData.selectable === true && !excludedModels.includes(child.name) && elementsToRandomize.includes(child.name)) {
+                    let uniqueColor = generateUniqueColor(uniqueColors); // Generate a unique color
+                    child.material.color.set(uniqueColor); // Apply the unique color
+                    uniqueColors.push(uniqueColor); // Store the color to ensure uniqueness
+                    addModifiedElement(child); // Add the element to the modified list
                 }
             });
         }
 
-        // Ajouter un écouteur pour la touche "u"
+       // Ajouter un écouteur pour la touche "u"
         document.addEventListener("keydown", (event) => {
             if (event.key === "u") {
                 // Parcourir les éléments modifiés et les afficher en jaune
-                modifiedElements.forEach((mesh) => {
+                modifiedElements.forEach((element) => {
                     if (element.material) {
                         element.material.color.set(0xffff00); // Couleur jaune
                     }
@@ -276,35 +529,189 @@
             }
         });
 
-        // Fonction pour appliquer aléatoirement la randomisation de textures et shaders uniquement à scene2
-        async function applyRandomizationToScene2(scene, excludedModels) {
-            const randomCount = getRandomNumberBetween5And10(); // Générer un nombre aléatoire entre 5 et 10
-            let randomizedCount = 0;
+        let isViolet = false; // Variable pour suivre l'état de la couleur
 
-            for (const child of scene.children) {
-                if (child.isMesh && !excludedModels.includes(child.name)) {
-                    if (randomizedCount >= randomCount) break; // Arrêter après avoir atteint le nombre aléatoire
-                    await randomizeMeshAppearance(child);
-                    randomizedCount++;
+        // Ajouter un écouteur pour la touche "i"
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "i") {
+                scene2.traverse((child) => {
+                    if (child.isMesh && child.userData.selectable === true) {
+                        if (child.material) {
+                            if (!isViolet) {
+                                // Met en évidence les éléments modifiables
+                                if (child.userData.originalColor === undefined) {
+                                    child.userData.originalColor = child.material.color.getHex();
+                                }
+                                child.material.color.set(0x800080); // Couleur violet
+                            } else {
+                                // Repasser à la couleur normale
+                                if (child.userData.originalColor !== undefined) {
+                                    child.material.color.set(child.userData.originalColor);
+                                }
+                            }
+                        }
+                    }
+                });
+                isViolet = !isViolet; // Inverser l'état
+            }
+        });
+
+        // Ajouter une fonctionnalité pour basculer la visibilité de la boîte à outils avec la touche "t"
+        const toolbox = document.querySelector('.toolbox');
+        toolbox.style.display = 'none'; // Masquer initialement la boîte à outils
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 't') {
+                toolbox.style.display = toolbox.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
+        // Fonction pour changer la couleur des éléments mesh, en excluant `scene.gltf`
+        function changeMeshColor(scene, color) {
+            scene.traverse((child) => {
+                if (child.isMesh && child.material && child.userData.selectable) {
+                    child.material.color.set(color); // Appliquer la couleur spécifiée
+                }
+            });
+        }
+
+        // Exemple d'utilisation : changer la couleur des mesh de `scene2` en rouge
+        changeMeshColor(scene2, 0xff0000);
+
+        // Configuration de la troisième scène
+        const scene3 = new THREE.Scene();
+        scene3.background = new THREE.Color(0x80CEFF); // Appliquer le même fond que les scènes principales
+
+        const camera3 = new THREE.PerspectiveCamera(30, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 200);
+        camera3.position.set(0, 2, 5); // Ajuster la position pour voir les torus
+        camera3.lookAt(0, 0, 0);
+
+        // ShaderMaterial pour les torus
+        const torusShaderMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                uResolution: { value: new THREE.Vector2(SCREEN_WIDTH, SCREEN_HEIGHT) },
+                uMouse: { value: new THREE.Vector2(0, 0) },
+                uTime: { value: 0 }
+            },
+            vertexShader: `
+                varying vec3 vUv; 
+                void main() {
+                    vUv = position; 
+                    vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_Position = projectionMatrix * modelViewPosition; 
+                }
+            `,
+            fragmentShader: `
+                uniform vec2 uResolution;
+                uniform vec2 uMouse;
+                uniform float uTime;
+                varying vec3 vUv;
+                void main() {
+                    vec2 p = gl_FragCoord.xy / uResolution.xy;
+                    vec3 color = vec3(
+                        0.5 + 0.5 * sin(uTime + vUv.x) * 0.8 + 0.2,
+                        0.5 + 0.5 * cos(uTime + vUv.y) * 0.8 + 0.2,
+                        0.5 + 0.5 * sin(uTime) * 0.8 + 0.2
+                    );
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        });
+
+        // Création des trois torus
+        const torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 16, 100);
+        const torus1 = new THREE.Mesh(torusGeometry, torusShaderMaterial);
+        const torus2 = new THREE.Mesh(torusGeometry, torusShaderMaterial);
+        const torus3 = new THREE.Mesh(torusGeometry, torusShaderMaterial);
+
+        torus1.position.set(-1.5, 0, 0);
+        torus2.position.set(0, 0, 0);
+        torus3.position.set(1.5, 0, 0);
+
+        scene3.add(torus1, torus2, torus3);
+
+        // Lumière pour la troisième scène
+        const light3 = new THREE.DirectionalLight(0xffffff, 1);
+        light3.position.set(0, 5, 5);
+        scene3.add(light3);
+
+        // Gestion des vies
+        let lives = 3; // Nombre initial de vies
+        const torusLives = [torus1, torus2, torus3]; // Les torus représentent les vies
+
+        function updateLivesDisplay() {
+            torusLives.forEach((torus, index) => {
+                torus.visible = index < lives; // Afficher uniquement les torus correspondant aux vies restantes
+            });
+        }
+
+        function loseLife() {
+            if (lives > 0) {
+                lives--;
+                updateLivesDisplay();
+                if (lives === 0) {
+                    showGameOverScreen(); // Afficher l'écran de fin si toutes les vies sont perdues
                 }
             }
         }
 
-        // Exclure `scene.gltf` des modèles à randomiser
-        const excludedModels = ['scene.gltf'];
-
-        // Appliquer la randomisation uniquement aux éléments de scene2
-        setTimeout(async () => {
-            await applyRandomizationToScene2(scene2, excludedModels);
-        }, 1000); // Délai pour s'assurer que les modèles sont chargés
-
-        // Fonction pour générer un nombre aléatoire entre 5 et 10 inclus
-        function getRandomNumberBetween5And10() {
-            return Math.floor(Math.random() * (10 - 5 + 1)) + 5;
+        function showGameOverScreen() {
+            endScreen.style.display = 'flex'; // Afficher l'écran de fin
+            endScreen.querySelector('h1').innerText = 'Vous avez perdu !'; // Modifier le message
         }
 
+        // Initialiser l'affichage des vies
+        updateLivesDisplay();
+
+        // Masquer le menu et démarrer le jeu
+        const menuOverlay = document.getElementById('menuOverlay');
+        const startButton = document.getElementById('startButton');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeControl = document.querySelector('.volume-control');
+
+        // Initialiser le volume
+        backgroundMusic.volume = volumeSlider.value;
+
+        // Mettre à jour le volume lorsque le slider change
+        volumeSlider.addEventListener('input', () => {
+            backgroundMusic.volume = volumeSlider.value;
+        });
+
+        startButton.addEventListener('click', async () => {
+            menuOverlay.style.display = 'none';
+            backgroundMusic.play();
+            volumeControl.style.display = 'flex';
+
+            applyRandomizationToScene2(scene2, excludedModels);
+            updateCounter(); // Initialiser le compteur
+            animate();
+        });
+
+        // Ajouter un écouteur pour la touche "r" pour réinitialiser la position des caméras
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'r') {
+                // Réinitialiser la position et l'orientation des caméras
+                camera.position.set(0, 5, 10);
+                camera.lookAt(0, 0, 0);
+                camera.updateProjectionMatrix();
+
+                camera2.position.set(0, 5, 10);
+                camera2.lookAt(0, 0, 0);
+                camera2.updateProjectionMatrix();
+
+                camera3.position.set(0, 5, 10);
+                camera3.lookAt(0, 0, 0);
+                camera3.updateProjectionMatrix();
+            }
+        });
+
+        // Empêcher l'animation de démarrer avant de cliquer sur "Commencer"
         function animate() {
             requestAnimationFrame(animate);
+
+            const elapsedTime = clock.getElapsedTime();
+            torusShaderMaterial.uniforms.uTime.value = elapsedTime;
 
             controls.update();
             controls2.update();
@@ -330,8 +737,19 @@
             camera2.aspect = (SCREEN_WIDTH / 2) / SCREEN_HEIGHT; // Ajuster le ratio d'aspect de la caméra 2
             camera2.updateProjectionMatrix();
             renderer.render(scene2, camera2);
+
+            // Rendu de la troisième scène (en haut, centré horizontalement)
+            const thirdSceneWidth = SCREEN_WIDTH / 5; // Réduire légèrement la taille de la fenêtre
+            const thirdSceneHeight = SCREEN_HEIGHT / 5;
+            const thirdSceneX = (SCREEN_WIDTH - thirdSceneWidth) / 2; // Centrer horizontalement
+            const thirdSceneY = SCREEN_HEIGHT - thirdSceneHeight - 10; // Positionner en haut avec un léger décalage
+            renderer.setViewport(thirdSceneX, thirdSceneY, thirdSceneWidth, thirdSceneHeight);
+            renderer.setScissor(thirdSceneX, thirdSceneY, thirdSceneWidth, thirdSceneHeight);
+            renderer.setScissorTest(true);
+            camera3.aspect = thirdSceneWidth / thirdSceneHeight;
+            camera3.updateProjectionMatrix();
+            renderer.render(scene3, camera3);
         }
-        animate();
 
         function onWindowResize() {
             SCREEN_WIDTH = window.innerWidth;
@@ -343,6 +761,9 @@
 
             camera2.aspect = (SCREEN_WIDTH / 2) / SCREEN_HEIGHT;
             camera2.updateProjectionMatrix();
+
+            camera3.aspect = (SCREEN_WIDTH / 5) / (SCREEN_HEIGHT / 5);
+            camera3.updateProjectionMatrix();
 
             renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         }

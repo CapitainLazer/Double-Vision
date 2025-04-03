@@ -18,7 +18,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Object_18"
+			"name":"keyboard"
 		},
 		{
 			"children":[
@@ -45,7 +45,7 @@
 					"specularFactor":0.4007631242275238
 				}
 			},
-			"name":"lpb_gradient.005",
+			"name":"lpb_gradient.024",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -57,7 +57,7 @@
 	],
 	"meshes":[
 		{
-			"name":"Object_7",
+			"name":"Object_7.002",
 			"primitives":[
 				{
 					"attributes":{
@@ -89,7 +89,7 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":1560,
+			"count":1561,
 			"max":[
 				0.17214882373809814,
 				-0.07001837342977524,
@@ -105,19 +105,19 @@
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":1560,
+			"count":1561,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":1560,
+			"count":1561,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":1560,
+			"count":1561,
 			"type":"VEC2"
 		},
 		{
@@ -130,32 +130,32 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":18720,
+			"byteLength":18732,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":18720,
-			"byteOffset":18720,
+			"byteLength":18732,
+			"byteOffset":18732,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":12480,
-			"byteOffset":37440,
+			"byteLength":12488,
+			"byteOffset":37464,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":12480,
-			"byteOffset":49920,
+			"byteLength":12488,
+			"byteOffset":49952,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":14976,
-			"byteOffset":62400,
+			"byteOffset":62440,
 			"target":34963
 		}
 	],
@@ -167,7 +167,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":77376,
+			"byteLength":77416,
 			"uri":"keyboard.bin"
 		}
 	]

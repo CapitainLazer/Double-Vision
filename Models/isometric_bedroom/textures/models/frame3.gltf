@@ -18,17 +18,22 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"book1"
+			"name":"frame3"
 		},
 		{
 			"children":[
 				0
 			],
-			"name":"book_13",
+			"name":"frame.004_61",
+			"scale":[
+				0.39136308431625366,
+				0.39136308431625366,
+				0.39136308431625366
+			],
 			"translation":[
-				-0.43939322233200073,
-				0.24811875820159912,
-				-1.5203642845153809
+				-0.3960610330104828,
+				1.0818713903427124,
+				-1.8715174198150635
 			]
 		}
 	],
@@ -45,7 +50,7 @@
 					"specularFactor":0.4007631242275238
 				}
 			},
-			"name":"lpb_gradient.029",
+			"name":"lpb_gradient.034",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -57,7 +62,7 @@
 	],
 	"meshes":[
 		{
-			"name":"book1",
+			"name":"frame3",
 			"primitives":[
 				{
 					"attributes":{
@@ -89,73 +94,73 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":264,
+			"count":218,
 			"max":[
-				0.03326445072889328,
-				0.1070108562707901,
-				0.09838917851448059
+				0.3499999940395355,
+				1,
+				0.07771829515695572
 			],
 			"min":[
-				-0.03326445072889328,
-				-0.1070108562707901,
-				-0.09838917851448059
+				-0.3499999940395355,
+				0,
+				-0.07771829515695572
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":264,
+			"count":218,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":264,
+			"count":218,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":264,
+			"count":218,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
 			"componentType":5123,
-			"count":708,
+			"count":1104,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":3168,
+			"byteLength":2616,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3168,
-			"byteOffset":3168,
+			"byteLength":2616,
+			"byteOffset":2616,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":2112,
-			"byteOffset":6336,
+			"byteLength":1744,
+			"byteOffset":5232,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":2112,
-			"byteOffset":8448,
+			"byteLength":1744,
+			"byteOffset":6976,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":1416,
-			"byteOffset":10560,
+			"byteLength":2208,
+			"byteOffset":8720,
 			"target":34963
 		}
 	],
@@ -167,8 +172,8 @@
 	],
 	"buffers":[
 		{
-			"byteLength":11976,
-			"uri":"book1.bin"
+			"byteLength":10928,
+			"uri":"frame3.bin"
 		}
 	]
 }

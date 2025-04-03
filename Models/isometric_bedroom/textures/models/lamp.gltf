@@ -18,7 +18,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Object_24"
+			"name":"lamp"
 		},
 		{
 			"children":[
@@ -56,7 +56,7 @@
 					"specularFactor":0.4007631242275238
 				}
 			},
-			"name":"lpb_gradient",
+			"name":"lpb_gradient.028",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -68,7 +68,7 @@
 	],
 	"meshes":[
 		{
-			"name":"Object_10",
+			"name":"lamp",
 			"primitives":[
 				{
 					"attributes":{

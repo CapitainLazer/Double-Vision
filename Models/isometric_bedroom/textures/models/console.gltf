@@ -18,7 +18,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Object_28"
+			"name":"console"
 		},
 		{
 			"children":[
@@ -27,7 +27,7 @@
 			"name":"console_12",
 			"rotation":[
 				0,
-				0.060227736830711365,
+				0.06022774428129196,
 				0,
 				0.9981846809387207
 			],
@@ -51,7 +51,7 @@
 					"specularFactor":0.4007631242275238
 				}
 			},
-			"name":"lpb_gradient",
+			"name":"lpb_gradient.026",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -63,7 +63,7 @@
 	],
 	"meshes":[
 		{
-			"name":"Object_12",
+			"name":"Object_12.002",
 			"primitives":[
 				{
 					"attributes":{
