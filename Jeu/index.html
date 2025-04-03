@@ -132,6 +132,8 @@
             <li><strong>u</strong> : Afficher les éléments modifiés en jaune</li>
             <li><strong>clic</strong> : Trouver un élément modifié</li>
             <li><strong>r</strong> : Réinitialiser la position des caméras</li>
+            <li><strong>t</strong> : Afficher ou masquer ce guide</li>
+            <li><strong>espace</strong> : Mettre en pause ou reprendre la musique</li>
         </ul>
     </div>
     <div class="center-divider"></div>
@@ -280,9 +282,12 @@
         loadModel('../Models/isometric_bedroom/textures/models/frame4.gltf', scene, models, separatedObjects, true);
         loadModel('../Models/isometric_bedroom/textures/models/frame4.gltf', scene2, models2, separatedObjects, true);
 
-        const raycaster = new THREE.Raycaster(); // Raycaster pour détecter les objets
-        const mouse = new THREE.Vector2(); // Position de la souris
-        let previousIntersected = null; // Dernier objet intersecté
+        // Raycaster pour détecter les objets
+        const raycaster = new THREE.Raycaster(); 
+        // Position de la souris
+        const mouse = new THREE.Vector2(); 
+        // Dernier objet intersecté
+        let previousIntersected = null; 
 
         function onMouseMove(event) {
             // Calculer la position de la souris en coordonnées normalisées (-1 à +1)
@@ -293,13 +298,13 @@
         function highlightObjectsScene2() {
             raycaster.setFromCamera(mouse, camera2);
 
-            // Intersect objects in scene2
+            // Intersecter les objets dans la scène 2
             const intersects = raycaster.intersectObjects(models2, true).filter(intersect => 
-                intersect.object.isMesh && intersect.object.userData.selectable === true && intersect.object.name !== 'scene.gltf' // Exclude scene.gltf
+                intersect.object.isMesh && intersect.object.userData.selectable === true && intersect.object.name !== 'scene.gltf' // Exclure scene.gltf
             );
 
             if (previousIntersected && previousIntersected !== intersects[0]?.object) {
-                // Reset the color of the previously intersected object
+                // Réinitialiser la couleur de l'objet précédemment intersecté
                 if (previousIntersected.material && previousIntersected.userData.originalColor) {
                     previousIntersected.material.color.set(previousIntersected.userData.originalColor);
                 }
@@ -309,12 +314,12 @@
             if (intersects.length > 0) {
                 const intersected = intersects[0].object;
 
-                // Highlight the intersected object
+                // Mettre en surbrillance l'objet intersecté
                 if (intersected.isMesh && intersected.material) {
                     if (!intersected.userData.originalColor) {
                         intersected.userData.originalColor = intersected.material.color.clone();
                     }
-                    intersected.material.color.set(0x0000ff); // Apply blue highlight
+                    intersected.material.color.set(0x0000ff); // Appliquer une surbrillance bleue
                     previousIntersected = intersected;
                 }
             }
@@ -425,14 +430,14 @@
         const excludedModels = ['scene.gltf']; // Exclure `scene.gltf` des interactions
 
         function onElementClick(event) {
-            // Convert mouse position to normalized device coordinates (-1 to +1)
+            // Convertir la position de la souris en coordonnées normalisées (-1 à +1)
             mouse.x = ((event.clientX - SCREEN_WIDTH / 2) / (SCREEN_WIDTH / 2)) * 2 - 1;
             mouse.y = -(event.clientY / SCREEN_HEIGHT) * 2 + 1;
 
-            // Set raycaster from camera2 and mouse position
+            // Configurer le raycaster à partir de camera2 et de la position de la souris
             raycaster.setFromCamera(mouse, camera2);
 
-            // Intersect objects in the scene2
+            // Intersecter les objets dans la scène 2
             const intersects = raycaster.intersectObjects(models2, true).filter(intersect => 
                 intersect.object.isMesh && intersect.object.userData.selectable === true && !excludedModels.includes(intersect.object.name)
             );
@@ -440,15 +445,15 @@
             if (intersects.length > 0) {
                 const clickedObject = intersects[0].object;
 
-                // Check if the clicked object is modified and not already found
+                // Vérifier si l'objet cliqué est modifié et non encore trouvé
                 if (isModifiedElement(clickedObject) && !isFoundElement(clickedObject)) {
-                    addFoundElement(clickedObject); // Mark the element as found
-                    updateCounter(); // Update the score counter
+                    addFoundElement(clickedObject); // Marquer l'élément comme trouvé
+                    updateCounter(); // Mettre à jour le compteur de score
                 } else if (!isModifiedElement(clickedObject)) {
-                    loseLife(); // Lose a life if the clicked object is selectable but not modified
+                    loseLife(); // Perdre une vie si l'objet cliqué est sélectionnable mais non modifié
                 }
             } else {
-                console.log("No object detected under the click.");
+                console.log("Aucun objet détecté sous le clic.");
             }
         }
 
@@ -503,16 +508,16 @@
 
         // Fonction pour appliquer une randomisation de texture et de shader uniquement à scene2
         async function applyRandomizationToScene2(lascene, excludedModels) {
-            const randomCount = getRandomNumberBetween5And10(); // Generate a random number between 5 and 10
-            const elementsToRandomize = getRandomArr(modifiableElements, randomCount); // Get random elements
+            const randomCount = getRandomNumberBetween5And10(); // Générer un nombre aléatoire entre 5 et 10
+            const elementsToRandomize = getRandomArr(modifiableElements, randomCount); // Obtenir des éléments aléatoires
             const uniqueColors = [];
             
             lascene.traverse((child) => {
                 if (child.isMesh && child.userData.selectable === true && !excludedModels.includes(child.name) && elementsToRandomize.includes(child.name)) {
-                    let uniqueColor = generateUniqueColor(uniqueColors); // Generate a unique color
-                    child.material.color.set(uniqueColor); // Apply the unique color
-                    uniqueColors.push(uniqueColor); // Store the color to ensure uniqueness
-                    addModifiedElement(child); // Add the element to the modified list
+                    let uniqueColor = generateUniqueColor(uniqueColors); // Générer une couleur unique
+                    child.material.color.set(uniqueColor); // Appliquer la couleur unique
+                    uniqueColors.push(uniqueColor); // Stocker la couleur pour garantir l'unicité
+                    addModifiedElement(child); // Ajouter l'élément à la liste des modifiés
                 }
             });
         }
